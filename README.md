@@ -6,4 +6,6 @@ GUI图形界面 自动完成hdiff差分包更新
 
 1. 新建virtualvenv
 2. 安装依赖包：pyqt5, pyqt5-tools
-3. todo
+
+## TODO：
+-[x] 晚安

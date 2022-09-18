@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>531</width>
-    <height>429</height>
+    <height>717</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,13 +43,13 @@
       <x>10</x>
       <y>180</y>
       <width>511</width>
-      <height>201</height>
+      <height>491</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Courier New</family>
-      <pointsize>12</pointsize>
+      <family>Segoe UI</family>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="readOnly">

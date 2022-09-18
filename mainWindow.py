@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(531, 429)
+        MainWindow.resize(531, 717)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/pic/RoundCorner.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -28,10 +28,10 @@ class Ui_MainWindow(object):
         self.commandLinkButton.setFont(font)
         self.commandLinkButton.setObjectName("commandLinkButton")
         self.plainTextEdit = QtWidgets.QPlainTextEdit(self.centralwidget)
-        self.plainTextEdit.setGeometry(QtCore.QRect(10, 180, 511, 201))
+        self.plainTextEdit.setGeometry(QtCore.QRect(10, 180, 511, 491))
         font = QtGui.QFont()
-        font.setFamily("Courier New")
-        font.setPointSize(12)
+        font.setFamily("Segoe UI")
+        font.setPointSize(9)
         self.plainTextEdit.setFont(font)
         self.plainTextEdit.setReadOnly(True)
         self.plainTextEdit.setPlainText("")

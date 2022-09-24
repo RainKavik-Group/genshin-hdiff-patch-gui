@@ -17,7 +17,9 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         self.setFixedSize(self.width(), self.height())
         self.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)
         self.path50_button.clicked.connect(lambda: self.selectFolder(self.path50_textbox, "选择完整客户端路径："))
-        self.path51_button.clicked.connect(lambda: self.selectFolder(self.path51_textbox, "选择差分包路径："))
+        self.path51_button.clicked.connect(lambda: self.selectFolder(self.path51_textbox, "选择游戏差分包路径："))
+        self.pathAudio_button.clicked.connect(lambda: self.selectFolder(self.pathAudio_textbox, "选择语音差分包路径："))
+        self.checkBox.clicked.connect(self.checkAudio)
         self.commandLinkButton.clicked.connect(self.startPatch)
 
     def selectFolder(self, textbox: QLineEdit, title: str):
@@ -25,6 +27,10 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         ret_path = dialog.getExistingDirectory(self, title)
         if ret_path != "":
             textbox.setText(ret_path)
+
+    def checkAudio(self):
+        self.pathAudio_textbox.setEnabled(self.checkBox.isChecked())
+        self.pathAudio_button.setEnabled(self.checkBox.isChecked())
 
     def consoleWrite(self, content: str):
         self.plainTextEdit.appendPlainText(content)
@@ -50,19 +56,23 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
             return
         path50 = self.path50_textbox.text().replace("/", "\\")
         path51 = self.path51_textbox.text().replace("/", "\\")
-        if path50 == "" or path51 == "":
+        pathAudio = self.pathAudio_textbox.text().replace("/", "\\")
+        if (path50 == "" or path51 == "") or (self.checkBox.isChecked() and pathAudio == ""):
             QMessageBox.critical(self, "Error", "路径不能为空！")
             return
-        for mypath in (path50, path51):
+        '''for mypath in (path50, path51):
             if " " in mypath:
                 QMessageBox.critical(self, "Error", "路径中不能含有空格！")
-                return
+                return'''
         for file_name in ("deletefiles.txt", "hdifffiles.txt"):
-            if not os.path.exists(os.path.join(path51, file_name)):
+            if (not os.path.exists(os.path.join(path51, file_name))) or (
+            not os.path.exists(os.path.join(pathAudio, "hdifffiles.txt"))):
                 QMessageBox.critical(self, "Error",
                                      file_name + " 文件不存在于差分包路径下！\n\n请确保你下载的是正确的差分包文件！")
                 return
-        paths_str = "完整客户端路径：\n      " + str(path50) + "\n\n差分包路径：\n      " + str(path51)
+        paths_str = "完整客户端路径：\n      " + str(path50) + "\n\n游戏差分包路径：\n      " + str(path51)
+        if self.checkBox.isChecked():
+            paths_str += "\n\n语音差分包路径：\n      " + str(pathAudio)
         ret_1 = QMessageBox.information(self, "Warning",
                                         "请确认你所填的路径是否正确：\n\n\n" + paths_str + "\n\n\n填写不正确的路径会导致合并失败，一旦出错只能重新解压重来！",
                                         QMessageBox.Yes | QMessageBox.No)
@@ -73,6 +83,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
             if ret_2 == QMessageBox.Yes:
                 self.plainTextEdit.setPlainText("")
                 self.commandLinkButton.setEnabled(False)
+                self.checkBox.setEnabled(False)
                 try:
                     def str_strip(content: str):
                         return content.replace("\n", "").replace("/", "\\")
@@ -108,12 +119,15 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                     # hpatchzPath = r"C:\Users\MLChinoo\Downloads\Compressed\hpatchz.exe"
                     rootPath_50 = path50 + "\\"
                     rootPath_51 = path51 + "\\"
+                    rootPath_Audio = pathAudio + "\\"
                     hpatchzPath = str_strip(os.path.join(os.getcwd(), "hpatchz.exe"))
 
                     with open(os.path.join(rootPath_51, "deletefiles.txt")) as file1:
                         deletefiles = file1.readlines()
                     with open(os.path.join(rootPath_51, "hdifffiles.txt")) as file2:
                         hdifffiles = file2.readlines()
+                    with open(os.path.join(rootPath_Audio, "hdifffiles.txt")) as file3:
+                        hdifffiles_audio = file3.readlines()
 
                     for eachFile1 in deletefiles:
                         # print(os.path.join(rootPath_50, eachFile1))
@@ -128,7 +142,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                         remoteName = tempArray["remoteName"]
                         baseName = os.path.basename(remoteName)
                         self.consoleWrite("————————————————————")
-                        self.consoleWrite("2.Patching " + baseName)
+                        self.consoleWrite("2.GAME Patching " + baseName)
                         self.execCMD('"' + hpatchzPath + '" "{}" "{}" "{}"'.format(
                             str_strip(os.path.join(rootPath_50, remoteName)),
                             str_strip(os.path.join(rootPath_51, remoteName + ".hdiff")),
@@ -139,8 +153,26 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                         # print(os.path.join(rootPath_51, remoteName + ".hdiff"))
                         os.remove(str_strip(os.path.join(rootPath_51, remoteName + ".hdiff")))
 
+                    tempPath = os.path.join(rootPath_50, "temp_audio")
+                    mkdir(tempPath)
+                    for eachLine2 in hdifffiles_audio:
+                        tempArray = json.loads(eachLine2)
+                        remoteName = tempArray["remoteName"]
+                        baseName = os.path.basename(remoteName)
+                        self.consoleWrite("————————————————————")
+                        self.consoleWrite("2.AUDIO Patching " + baseName)
+                        self.execCMD('"' + hpatchzPath + '" "{}" "{}" "{}"'.format(
+                            str_strip(os.path.join(rootPath_50, remoteName)),
+                            str_strip(os.path.join(rootPath_Audio, remoteName + ".hdiff")),
+                            str_strip(os.path.join(tempPath, baseName))))
+                        movefile(str_strip(os.path.join(tempPath, baseName)),
+                                 str_strip(os.path.join(rootPath_Audio, remoteName)))
+                        # print(os.path.join(tempPath, baseName), os.path.join(rootPath_51, remoteName))
+                        # print(os.path.join(rootPath_51, remoteName + ".hdiff"))
+                        os.remove(str_strip(os.path.join(rootPath_Audio, remoteName + ".hdiff")))
+
                     self.consoleWrite("————————————————————")
-                    self.consoleWrite("3.Copying")
+                    self.consoleWrite("3.GAME Copying...")
                     root_src_dir = rootPath_51
                     root_dst_dir = rootPath_50
                     for mypath in (root_dst_dir, root_src_dir):
@@ -154,7 +186,39 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                                     str_strip(os.path.join(mypath, "YuanShen_Data", "Plugins", "crashreport.exe")),
                                     stat.S_IWRITE)
                             except FileNotFoundError:
-                                self.consoleWrite("Warning: crashreport.exe not found, may cause some problems!")
+                                pass
+                                # self.consoleWrite("Warning: crashreport.exe not found, may cause some problems!")
+                    for src_dir, dirs, files in os.walk(root_src_dir):
+                        dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
+                        if not os.path.exists(dst_dir):
+                            os.makedirs(dst_dir)
+                        for file_ in files:
+                            src_file = os.path.join(src_dir, file_)
+                            dst_file = os.path.join(dst_dir, file_)
+                            if os.path.exists(dst_file):
+                                # in case of the src and dst are the same file
+                                if os.path.samefile(src_file, dst_file):
+                                    continue
+                                os.remove(dst_file)
+                            shutil.move(src_file, dst_dir)
+
+                    self.consoleWrite("————————————————————")
+                    self.consoleWrite("3.AUDIO Copying...")
+                    root_src_dir = rootPath_Audio
+                    root_dst_dir = rootPath_50
+                    for mypath in (root_dst_dir, root_src_dir):
+                        try:
+                            os.chmod(
+                                str_strip(os.path.join(mypath, "GenshinImpact_Data", "Plugins", "crashreport.exe")),
+                                stat.S_IWRITE)
+                        except FileNotFoundError:
+                            try:
+                                os.chmod(
+                                    str_strip(os.path.join(mypath, "YuanShen_Data", "Plugins", "crashreport.exe")),
+                                    stat.S_IWRITE)
+                            except FileNotFoundError:
+                                pass
+                                # self.consoleWrite("Warning: crashreport.exe not found, may cause some problems!")
                     for src_dir, dirs, files in os.walk(root_src_dir):
                         dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
                         if not os.path.exists(dst_dir):

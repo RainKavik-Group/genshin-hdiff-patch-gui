@@ -5,8 +5,8 @@ import sys
 import os
 import traceback
 import subprocess
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QLineEdit, QMessageBox
+from PySide6 import QtCore
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QLineEdit, QMessageBox
 from mainWindow import Ui_MainWindow
 
 
@@ -114,6 +114,28 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                             status = 1
                         return status
 
+                    def do_some_copy(root_src_dir, root_dst_dir):
+                        for src_dir, dirs, files in os.walk(root_src_dir):
+                            dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
+                            if not os.path.exists(dst_dir):
+                                os.makedirs(dst_dir)
+                            for file_ in files:
+                                src_file = os.path.join(src_dir, file_)
+                                dst_file = os.path.join(dst_dir, file_)
+                                if os.path.exists(dst_file):
+                                    # in case of the src and dst are the same file
+                                    if os.path.samefile(src_file, dst_file):
+                                        continue
+                                    os.remove(dst_file)
+                                shutil.move(src_file, dst_dir)
+
+                    def remove_read_only(path: str):
+                        for root, dirs, files in os.walk(path):
+                            for dir in dirs:
+                                for file in files:
+                                    file_path = os.path.join(root, dir, file)
+                                    os.chmod(str_strip(file_path), stat.S_IWRITE)
+
                     # rootPath_50 = r"C:\Users\MLChinoo\Downloads\Compressed\GenshinImpact_3.0.50_beta_3" + "\\"
                     # rootPath_51 = r"C:\Users\MLChinoo\Downloads\Compressed\game_3.0.50_3.0.51_hdiff_XoHbpS403sPYEw9K_2" + "\\"
                     # hpatchzPath = r"C:\Users\MLChinoo\Downloads\Compressed\hpatchz.exe"
@@ -129,11 +151,20 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                     with open(os.path.join(rootPath_Audio, "hdifffiles.txt")) as file3:
                         hdifffiles_audio = file3.readlines()
 
+                    for eachDir in (rootPath_50, rootPath_51, rootPath_Audio):
+                        self.consoleWrite("————————————————————")
+                        self.consoleWrite("0.Removing Read-Only Stats in {} ...".format(eachDir))
+                        remove_read_only(eachDir)
+
                     for eachFile1 in deletefiles:
                         # print(os.path.join(rootPath_50, eachFile1))
                         self.consoleWrite("————————————————————")
                         self.consoleWrite("1.Removing " + eachFile1)
-                        os.remove(str_strip(os.path.join(rootPath_50, eachFile1)))
+                        try:
+                            os.remove(str_strip(os.path.join(rootPath_50, eachFile1)))
+                        except FileNotFoundError:
+                            traceback.print_exc()
+                            continue
 
                     tempPath = os.path.join(rootPath_50, "temp")
                     mkdir(tempPath)
@@ -173,65 +204,11 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
 
                     self.consoleWrite("————————————————————")
                     self.consoleWrite("3.GAME Copying...")
-                    root_src_dir = rootPath_51
-                    root_dst_dir = rootPath_50
-                    for mypath in (root_dst_dir, root_src_dir):
-                        try:
-                            os.chmod(
-                                str_strip(os.path.join(mypath, "GenshinImpact_Data", "Plugins", "crashreport.exe")),
-                                stat.S_IWRITE)
-                        except FileNotFoundError:
-                            try:
-                                os.chmod(
-                                    str_strip(os.path.join(mypath, "YuanShen_Data", "Plugins", "crashreport.exe")),
-                                    stat.S_IWRITE)
-                            except FileNotFoundError:
-                                pass
-                                # self.consoleWrite("Warning: crashreport.exe not found, may cause some problems!")
-                    for src_dir, dirs, files in os.walk(root_src_dir):
-                        dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
-                        if not os.path.exists(dst_dir):
-                            os.makedirs(dst_dir)
-                        for file_ in files:
-                            src_file = os.path.join(src_dir, file_)
-                            dst_file = os.path.join(dst_dir, file_)
-                            if os.path.exists(dst_file):
-                                # in case of the src and dst are the same file
-                                if os.path.samefile(src_file, dst_file):
-                                    continue
-                                os.remove(dst_file)
-                            shutil.move(src_file, dst_dir)
+                    do_some_copy(rootPath_51, rootPath_50)
 
                     self.consoleWrite("————————————————————")
                     self.consoleWrite("3.AUDIO Copying...")
-                    root_src_dir = rootPath_Audio
-                    root_dst_dir = rootPath_50
-                    for mypath in (root_dst_dir, root_src_dir):
-                        try:
-                            os.chmod(
-                                str_strip(os.path.join(mypath, "GenshinImpact_Data", "Plugins", "crashreport.exe")),
-                                stat.S_IWRITE)
-                        except FileNotFoundError:
-                            try:
-                                os.chmod(
-                                    str_strip(os.path.join(mypath, "YuanShen_Data", "Plugins", "crashreport.exe")),
-                                    stat.S_IWRITE)
-                            except FileNotFoundError:
-                                pass
-                                # self.consoleWrite("Warning: crashreport.exe not found, may cause some problems!")
-                    for src_dir, dirs, files in os.walk(root_src_dir):
-                        dst_dir = src_dir.replace(root_src_dir, root_dst_dir, 1)
-                        if not os.path.exists(dst_dir):
-                            os.makedirs(dst_dir)
-                        for file_ in files:
-                            src_file = os.path.join(src_dir, file_)
-                            dst_file = os.path.join(dst_dir, file_)
-                            if os.path.exists(dst_file):
-                                # in case of the src and dst are the same file
-                                if os.path.samefile(src_file, dst_file):
-                                    continue
-                                os.remove(dst_file)
-                            shutil.move(src_file, dst_dir)
+                    do_some_copy(rootPath_Audio, rootPath_50)
 
                     self.consoleWrite("————————————————————")
                     self.consoleWrite("Done!")

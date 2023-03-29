@@ -6,6 +6,7 @@ import os
 import traceback
 import subprocess
 from PySide6 import QtCore
+from PySide6.QtGui import QTextCursor
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QLineEdit, QMessageBox
 from mainWindow import Ui_MainWindow
 
@@ -34,7 +35,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
 
     def consoleWrite(self, content: str):
         self.plainTextEdit.appendPlainText(content)
-        self.plainTextEdit.moveCursor(self.plainTextEdit.textCursor().End)
+        self.plainTextEdit.moveCursor(QTextCursor.MoveOperation.End)  # (self.plainTextEdit.textCursor().End) in PyQt5
         QApplication.processEvents()  # 保证文本框实时显示内容
         return
 

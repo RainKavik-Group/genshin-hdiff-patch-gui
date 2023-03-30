@@ -17,6 +17,8 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setFixedSize(self.width(), self.height())
         self.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)
+        if self.checkBox.isChecked():
+            self.checkAudio()
         self.path50_button.clicked.connect(lambda: self.selectFolder(self.path50_textbox, "选择完整客户端路径："))
         self.path51_button.clicked.connect(lambda: self.selectFolder(self.path51_textbox, "选择游戏差分包路径："))
         self.pathAudio_button.clicked.connect(lambda: self.selectFolder(self.pathAudio_textbox, "选择语音差分包路径："))
@@ -66,10 +68,15 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                 QMessageBox.critical(self, "Error", "路径中不能含有空格！")
                 return'''
         for file_name in ("deletefiles.txt", "hdifffiles.txt"):
-            if (not os.path.exists(os.path.join(path51, file_name))) or (
-            not os.path.exists(os.path.join(pathAudio, "hdifffiles.txt"))):
+            if not os.path.exists(os.path.join(path51, file_name)):
                 QMessageBox.critical(self, "Error",
-                                     file_name + " 文件不存在于差分包路径下！\n\n请确保你下载的是正确的差分包文件！")
+                                     file_name + " 文件不存在于游戏差分包路径下！\n\n请确保你下载的是正确的差分包文件！")
+                return
+        if self.checkBox.isChecked():
+            file_name = "hdifffiles.txt"
+            if not os.path.exists(os.path.join(pathAudio, file_name)):
+                QMessageBox.critical(self, "Error",
+                                     file_name + " 文件不存在于语音差分包路径下！\n\n请确保你下载的是正确的差分包文件！")
                 return
         paths_str = "完整客户端路径：\n      " + str(path50) + "\n\n游戏差分包路径：\n      " + str(path51)
         if self.checkBox.isChecked():
@@ -134,8 +141,10 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                         for root, dirs, files in os.walk(path):
                             for dir in dirs:
                                 for file in files:
-                                    file_path = os.path.join(root, dir, file)
+                                    file_path = os.path.join(root, file)
                                     os.chmod(str_strip(file_path), stat.S_IWRITE)
+                                    QApplication.processEvents()  # 保证文本框实时显示内容
+                        # sys.exit(0)
 
                     # rootPath_50 = r"C:\Users\MLChinoo\Downloads\Compressed\GenshinImpact_3.0.50_beta_3" + "\\"
                     # rootPath_51 = r"C:\Users\MLChinoo\Downloads\Compressed\game_3.0.50_3.0.51_hdiff_XoHbpS403sPYEw9K_2" + "\\"

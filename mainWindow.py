@@ -48,7 +48,7 @@ class Ui_MainWindow(object):
         self.plainTextEdit.setReadOnly(True)
         self.layoutWidget = QWidget(self.centralwidget)
         self.layoutWidget.setObjectName(u"layoutWidget")
-        self.layoutWidget.setGeometry(QRect(30, 40, 481, 22))
+        self.layoutWidget.setGeometry(QRect(30, 40, 481, 24))
         self.horizontalLayout = QHBoxLayout(self.layoutWidget)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
@@ -75,7 +75,7 @@ class Ui_MainWindow(object):
 
         self.layoutWidget1 = QWidget(self.centralwidget)
         self.layoutWidget1.setObjectName(u"layoutWidget1")
-        self.layoutWidget1.setGeometry(QRect(30, 90, 481, 22))
+        self.layoutWidget1.setGeometry(QRect(30, 90, 481, 24))
         self.horizontalLayout_2 = QHBoxLayout(self.layoutWidget1)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -104,7 +104,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.checkBox = QCheckBox(self.layoutWidget_2)
         self.checkBox.setObjectName(u"checkBox")
+        self.checkBox.setEnabled(False)
         self.checkBox.setFont(font2)
+        self.checkBox.setChecked(True)
 
         self.horizontalLayout_3.addWidget(self.checkBox)
 
@@ -124,7 +126,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 530, 23))
+        self.menubar.setGeometry(QRect(0, 0, 530, 22))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")

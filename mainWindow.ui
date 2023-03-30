@@ -65,7 +65,7 @@
       <x>30</x>
       <y>40</y>
       <width>481</width>
-      <height>22</height>
+      <height>24</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -107,7 +107,7 @@
       <x>30</x>
       <y>90</y>
       <width>481</width>
-      <height>22</height>
+      <height>24</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -152,6 +152,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QCheckBox" name="checkBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="font">
         <font>
          <family>微软雅黑</family>
@@ -160,6 +163,9 @@
        </property>
        <property name="text">
         <string>语音差分包：  </string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -192,7 +198,7 @@
      <x>0</x>
      <y>0</y>
      <width>530</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

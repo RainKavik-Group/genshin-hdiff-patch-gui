@@ -104,9 +104,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.checkBox = QCheckBox(self.layoutWidget_2)
         self.checkBox.setObjectName(u"checkBox")
-        self.checkBox.setEnabled(False)
+        self.checkBox.setEnabled(True)
         self.checkBox.setFont(font2)
-        self.checkBox.setChecked(True)
+        self.checkBox.setChecked(False)
 
         self.horizontalLayout_3.addWidget(self.checkBox)
 

@@ -1,13 +1,16 @@
 import json
+import os
 import shutil
 import stat
-import sys
-import os
-import traceback
 import subprocess
+import sys
+import traceback
+
 from PySide6 import QtCore
 from PySide6.QtGui import QTextCursor
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QLineEdit, QMessageBox
+from PySide6.QtWidgets import (QApplication, QFileDialog, QLineEdit,
+                               QMainWindow, QMessageBox)
+
 from mainWindow import Ui_MainWindow
 
 
@@ -144,30 +147,32 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                                     file_path = os.path.join(root, file)
                                     os.chmod(str_strip(file_path), stat.S_IWRITE)
                                     QApplication.processEvents()  # 保证文本框实时显示内容
-                        # sys.exit(0)
 
-                    # rootPath_50 = r"C:\Users\MLChinoo\Downloads\Compressed\GenshinImpact_3.0.50_beta_3" + "\\"
-                    # rootPath_51 = r"C:\Users\MLChinoo\Downloads\Compressed\game_3.0.50_3.0.51_hdiff_XoHbpS403sPYEw9K_2" + "\\"
-                    # hpatchzPath = r"C:\Users\MLChinoo\Downloads\Compressed\hpatchz.exe"
                     rootPath_50 = path50 + "\\"
                     rootPath_51 = path51 + "\\"
                     rootPath_Audio = pathAudio + "\\"
+
+                    if self.checkBox.isChecked():
+                        dirlist = [rootPath_50, rootPath_51, rootPath_Audio]
+                    else:
+                        dirlist = [rootPath_50, rootPath_51]
                     hpatchzPath = str_strip(os.path.join(os.getcwd(), "hpatchz.exe"))
 
                     with open(os.path.join(rootPath_51, "deletefiles.txt")) as file1:
                         deletefiles = file1.readlines()
                     with open(os.path.join(rootPath_51, "hdifffiles.txt")) as file2:
                         hdifffiles = file2.readlines()
-                    with open(os.path.join(rootPath_Audio, "hdifffiles.txt")) as file3:
-                        hdifffiles_audio = file3.readlines()
+                    
+                    if self.checkBox.isChecked():
+                        with open(os.path.join(rootPath_Audio, "hdifffiles.txt")) as file3:
+                            hdifffiles_audio = file3.readlines()
 
-                    for eachDir in (rootPath_50, rootPath_51, rootPath_Audio):
+                    for eachDir in dirlist:
                         self.consoleWrite("————————————————————")
                         self.consoleWrite("0.Removing Read-Only Stats in {} ...".format(eachDir))
                         remove_read_only(eachDir)
 
                     for eachFile1 in deletefiles:
-                        # print(os.path.join(rootPath_50, eachFile1))
                         self.consoleWrite("————————————————————")
                         self.consoleWrite("1.Removing " + eachFile1)
                         try:
@@ -178,6 +183,7 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
 
                     tempPath = os.path.join(rootPath_50, "temp")
                     mkdir(tempPath)
+
                     for eachLine2 in hdifffiles:
                         tempArray = json.loads(eachLine2)
                         remoteName = tempArray["remoteName"]
@@ -190,35 +196,33 @@ class MyMainForm(QMainWindow, Ui_MainWindow):
                             str_strip(os.path.join(tempPath, baseName))))
                         movefile(str_strip(os.path.join(tempPath, baseName)),
                                  str_strip(os.path.join(rootPath_51, remoteName)))
-                        # print(os.path.join(tempPath, baseName), os.path.join(rootPath_51, remoteName))
-                        # print(os.path.join(rootPath_51, remoteName + ".hdiff"))
                         os.remove(str_strip(os.path.join(rootPath_51, remoteName + ".hdiff")))
 
-                    tempPath = os.path.join(rootPath_50, "temp_audio")
-                    mkdir(tempPath)
-                    for eachLine2 in hdifffiles_audio:
-                        tempArray = json.loads(eachLine2)
-                        remoteName = tempArray["remoteName"]
-                        baseName = os.path.basename(remoteName)
-                        self.consoleWrite("————————————————————")
-                        self.consoleWrite("2.AUDIO Patching " + baseName)
-                        self.execCMD('"' + hpatchzPath + '" "{}" "{}" "{}"'.format(
-                            str_strip(os.path.join(rootPath_50, remoteName)),
-                            str_strip(os.path.join(rootPath_Audio, remoteName + ".hdiff")),
-                            str_strip(os.path.join(tempPath, baseName))))
-                        movefile(str_strip(os.path.join(tempPath, baseName)),
-                                 str_strip(os.path.join(rootPath_Audio, remoteName)))
-                        # print(os.path.join(tempPath, baseName), os.path.join(rootPath_51, remoteName))
-                        # print(os.path.join(rootPath_51, remoteName + ".hdiff"))
-                        os.remove(str_strip(os.path.join(rootPath_Audio, remoteName + ".hdiff")))
+                    if(self.checkBox.isChecked()):
+                        tempPath = os.path.join(rootPath_50, "temp_audio")
+                        mkdir(tempPath)
+                        for eachLine2 in hdifffiles_audio:
+                            tempArray = json.loads(eachLine2)
+                            remoteName = tempArray["remoteName"]
+                            baseName = os.path.basename(remoteName)
+                            self.consoleWrite("————————————————————")
+                            self.consoleWrite("2.AUDIO Patching " + baseName)
+                            self.execCMD('"' + hpatchzPath + '" "{}" "{}" "{}"'.format(
+                                str_strip(os.path.join(rootPath_50, remoteName)),
+                                str_strip(os.path.join(rootPath_Audio, remoteName + ".hdiff")),
+                                str_strip(os.path.join(tempPath, baseName))))
+                            movefile(str_strip(os.path.join(tempPath, baseName)),
+                                    str_strip(os.path.join(rootPath_Audio, remoteName)))
+                            os.remove(str_strip(os.path.join(rootPath_Audio, remoteName + ".hdiff")))
 
                     self.consoleWrite("————————————————————")
                     self.consoleWrite("3.GAME Copying...")
                     do_some_copy(rootPath_51, rootPath_50)
 
-                    self.consoleWrite("————————————————————")
-                    self.consoleWrite("3.AUDIO Copying...")
-                    do_some_copy(rootPath_Audio, rootPath_50)
+                    if(self.checkBox.isChecked()):
+                        self.consoleWrite("————————————————————")
+                        self.consoleWrite("3.AUDIO Copying...")
+                        do_some_copy(rootPath_Audio, rootPath_50)
 
                     self.consoleWrite("————————————————————")
                     self.consoleWrite("Done!")

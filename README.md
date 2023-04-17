@@ -4,7 +4,7 @@ GUI图形界面 自动完成hdiff差分包更新
 
 ## 构建：
 
-1. 安装Python 3.8, 新建virtualvenv
+1. 安装Python 3.8, 新建virtualenv
 2. 安装软件包：pyside6, pyinstaller  
 3. pyinstaller -D -w -i RoundCorner.ico main.py  
    构建成一个目录，包含运行库文件，路径./dist/main  
